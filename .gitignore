@@ -1,3 +1,5 @@
 hadoop/*
 wiki_dump_index.txt
 wiki_dump.xml
+*.class
+sequence_output.txt
