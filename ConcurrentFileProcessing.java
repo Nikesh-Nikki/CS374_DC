@@ -13,13 +13,15 @@ class FileProcessor implements Runnable {
     private Random random = new Random();
     private static int linesPerDoc[] = {5000, 10000, 15000, 20000};
     private int id = 0;
+    private int nthreads;
 
-    public FileProcessor(String inputFile, long startByte, long endByte, BufferedWriter writer, int startId) {
+    public FileProcessor(String inputFile, long startByte, long endByte, BufferedWriter writer, int startId, int nthreads) {
         this.inputFile = inputFile;
         this.startByte = startByte;
         this.endByte = endByte;
         this.writer = writer;
         this.id = startId;
+        this.nthreads = nthreads;
     }
 
     @Override
@@ -38,7 +40,7 @@ class FileProcessor implements Runnable {
                 charCount += line.length();
                 if (linesLeft == 0) {
                     linesLeft = linesPerDoc[random.nextInt(4)];
-                    id += 2;
+                    id += nthreads;
                     System.out.println("New doc with id : " + id + " lines: " + linesLeft);
                 }
                 
@@ -57,6 +59,9 @@ class FileProcessor implements Runnable {
 
 public class ConcurrentFileProcessing {
     public static void main(String[] args) throws IOException {
+
+        int nthreads = Integer.parseInt(args[0]);
+
         long startTime = System.currentTimeMillis();
         String inputFile = "wiki_dump.xml";
         String outputFile = "threaded_output.txt";
@@ -70,12 +75,10 @@ public class ConcurrentFileProcessing {
         // Create a shared BufferedWriter
         try {
             
-            // First thread reads from start to midpoint
-            executor.execute(new FileProcessor(inputFile, 0, midPoint, writer, -1));
-            
-            // Second thread reads from midpoint to end
-            executor.execute(new FileProcessor(inputFile, midPoint, fileSize, writer, -2));
-
+            for(int i = 1; i <= nthreads; i++) {
+                executor.execute(new FileProcessor(inputFile, fileSize * (i - 1) / nthreads,
+                                                                 fileSize* i / nthreads, writer, -i, nthreads));
+            }
         } finally {
             executor.shutdown();
             try {
