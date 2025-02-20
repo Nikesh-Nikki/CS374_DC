@@ -44,7 +44,7 @@ java ConcurrentFileProcessing <no. of threads>
 ## using Hadoop (Pseudo-Distributed Mode): 
 
 1. First start HDFS.
-   `./hadoop/sbin start-hdfs.sh`
+   `./hadoop/sbin/start-dfs.sh`
 2. Format and push the input file to HDFS.
    ```
    ./hadoop/bin/hdfs namenode -format
